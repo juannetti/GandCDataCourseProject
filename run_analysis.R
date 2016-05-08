@@ -71,4 +71,4 @@ tidy <-  aggregate(data, by = list(s = data$subject, a = data$activity), mean)
 tidyFinal <- tidy[, 3:length(names(tidy))]
 
 ##  Export the tidyData set 
-write.table(tidyFinal, './tidyData.txt',row.names=TRUE,sep='\t')
+write.table(tidyFinal, './GandCDataCourseProject/tidyData.txt',row.names=TRUE,sep='\t')
