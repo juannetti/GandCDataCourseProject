@@ -16,22 +16,59 @@ unzip ("dataset.zip", exdir = "./G&CD_CourseProyect")
 
 ##  get variable names from "features.txt" and handle some
 ##  specific problems with commas so each variable name is one row in var_names
-var_names <- read.csv("./G&CD_CourseProyect/UCI HAR Dataset/features.txt", header = FALSE)
-var_names_filtered <- filter(var_names, nchar(levels(V1)[V1]) > 2, V1 != "gravity)", V1 != "gravityMean)")
+var_names <- read.table("./G&CD_CourseProyect/UCI HAR Dataset/features.txt", header = FALSE)
+
 
 ##  get the data from test and train
-test <- read.csv("./G&CD_CourseProyect/UCI HAR Dataset/test/X_test.txt", header = FALSE)
-train <- read.csv("./G&CD_CourseProyect/UCI HAR Dataset/train/X_train.txt", header = FALSE)
+x_test <- read.table("./G&CD_CourseProyect/UCI HAR Dataset/test/X_test.txt", header = FALSE)
+x_train <- read.table("./G&CD_CourseProyect/UCI HAR Dataset/train/X_train.txt", header = FALSE)
+y_test <- read.table("./G&CD_CourseProyect/UCI HAR Dataset/test/y_test.txt", header = FALSE)
+y_train <- read.table("./G&CD_CourseProyect/UCI HAR Dataset/train/y_train.txt", header = FALSE)
+subject_test <- read.table("./G&CD_CourseProyect/UCI HAR Dataset/test/subject_test.txt", header = FALSE)
+subject_train <- read.table("./G&CD_CourseProyect/UCI HAR Dataset/train/subject_train.txt", header = FALSE)
 
-##  transform into as many columns as the features.txt declare as variables
-##  giving the proper descriptive name for each variable
-test_separated <- separate(test, V1, var_names_filtered[,1], sep = "[0-9]( |\t|\n|\r|\b)")
-train_separated <- separate(train, V1, var_names_filtered[,1], sep = "[0-9]( |\t|\n|\r|\b)")
 
-##  merge into one data set
-dataset <- rbind(test_separated, train_separated)
+##  combine all rows, test and train, in one dataset
+subject <- rbind(subject_test, subject_train)
+activity <- rbind(y_test, y_train)
+data <- rbind(x_test, x_train)
+
+
+##  rename subject and activity variables
+subject <- rename(subject, subject = V1)
+activity <- rename(activity, activity = V1)
+
+
+##  rename variables from x features
+names(data) <- var_names$V2
+
 
 ##  select columns with "mean" or "std" in their names
 ##  "Extracts only the measurements on the mean and standard deviation for each measurement."
-dataset_final <- select(dataset, matches("mean|std", ignore.case = TRUE))
-View(dataset_final)
+data <- select(data, matches("mean|std", ignore.case = TRUE))
+
+
+##  column bind the activity and subject columns to the x features dataset
+data <- cbind(subject, activity, data)
+
+##  rename varible names for better understanding
+names(data)<-gsub("[(]", "", names(data))
+names(data)<-gsub(")", "", names(data))
+names(data)<-gsub(",", "", names(data))
+names(data)<-gsub("-", "", names(data))
+names(data)<-gsub("std()", "SD", names(data))
+names(data)<-gsub("mean()", "MEAN", names(data))
+names(data)<-gsub("^t", "time", names(data))
+names(data)<-gsub("^f", "frequency", names(data))
+names(data)<-gsub("Acc", "Accelerometer", names(data))
+names(data)<-gsub("Gyro", "Gyroscope", names(data))
+names(data)<-gsub("Mag", "Magnitude", names(data))
+names(data)<-gsub("BodyBody", "Body", names(data))
+
+
+##  crate new dataset with 
+tidy <-  aggregate(data, by = list(s = data$subject, a = data$activity), mean)
+tidyFinal <- tidy[, 3:length(names(tidy))]
+
+##  Export the tidyData set 
+write.table(tidyFinal, './tidyData.txt',row.names=TRUE,sep='\t')
