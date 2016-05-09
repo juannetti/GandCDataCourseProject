@@ -1,8 +1,8 @@
-## Getting and Cleaning Data Project
+# Getting and Cleaning Data - Course Project
 
 Nicolás Giannetti
 
-Repo for the submission of the course project for the Johns Hopkins Getting and Cleaning Data course.
+This is the repo for the submission of the course project for the Coursera Getting and Cleaning Data course.
 
 ### Overview
 This project serves to demonstrate the collection and cleaning of a tidy data set that can be used for subsequent
